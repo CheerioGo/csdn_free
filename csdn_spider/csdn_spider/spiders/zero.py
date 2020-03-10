@@ -66,7 +66,7 @@ class ZeroSpider(scrapy.Spider):
 
         tree_branch = 2
         while self.req_count < self.max_req_count and tree_branch > 0:
-            user_id = db.user_get_id(1)
+            user_id = db.user_get_zero_id()
             if user_id is None:
                 break
             _url = f'{domain}/user/{user_id}/uploads'

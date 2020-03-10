@@ -24,10 +24,11 @@ def __init_db():
     collections = db.list_collection_names()
     if 'user' not in collections:
         db['user'].create_index([('id', 1)], unique=True)
-        db['user'].create_index([('state', 1)], unique=False)
+        db['user'].create_index([('state', 1)])
+        db['user'].create_index([('zero', 1)])
     if 'zero' not in collections:
         db['zero'].create_index([('id', 1)], unique=True)
-        db['zero'].create_index([('state', 1)], unique=False)
+        db['zero'].create_index([('state', 1)])
 
     user = db['user']
     zero = db['zero']
@@ -53,13 +54,23 @@ def zero_exist(_id):
 
 
 # user
-def user_get_id(state):
+def user_get_state_id():
     __get_db()
-    data = user.find_one({'state': state})
+    data = user.find_one({'state': 0})
     if data is None:
         return None
     _id = data['id']
-    user_set_state(_id, state + 1)
+    user_set_state(_id, 1)
+    return _id
+
+
+def user_get_zero_id():
+    __get_db()
+    data = user.find_one({'zero': 0})
+    if data is None:
+        return None
+    _id = data['id']
+    user_set_zero(_id, 1)
     return _id
 
 
@@ -71,6 +82,11 @@ def user_insert(docs):
 def user_set_state(_id, state):
     __get_db()
     user.update_one({'id': _id}, {'$set': {'state': state}})
+
+
+def user_set_zero(_id, zero):
+    __get_db()
+    user.update_one({'id': _id}, {'$set': {'zero': zero}})
 
 
 def user_exist(_id):

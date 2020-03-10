@@ -17,6 +17,7 @@ class UserSpiderItem(scrapy.Item):
             'id': self['id'],
             'name': self['name'],
             'state': 0,
+            'zero': 0,
         }
         return doc
 

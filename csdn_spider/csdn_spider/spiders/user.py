@@ -40,7 +40,7 @@ class UserSpider(scrapy.Spider):
 
         tree_branch = 2
         while self.req_count < self.max_req_count and tree_branch > 0:
-            user_id = db.user_get_id(0)
+            user_id = db.user_get_state_id()
             if user_id is None:
                 break
             _url = f'{domain1}/{user_id}'
