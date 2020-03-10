@@ -15,7 +15,7 @@ zero: pymongo.collection.Collection = None
 # zero - 2 : 已上传至云端资源
 
 def __init_db():
-    client = pymongo.MongoClient(host="127.0.0.1", port=27017)
+    client = pymongo.MongoClient(host="127.0.0.1", port=27017, username="yinlong91", password="yl873044")
     global db
     global user
     global zero
