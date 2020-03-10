@@ -9,21 +9,8 @@ zero: pymongo.collection.Collection = None
 def __init_db():
     client = pymongo.MongoClient(host="127.0.0.1", port=27017)
     global db
-    global raw
-    global user
     global zero
     db = client['csdn']
-
-    collections = db.list_collection_names()
-    if 'raw' not in collections:
-        db['raw'].create_index([('url', 1)], unique=True)
-    if 'user' not in collections:
-        db['user'].create_index([('id', 1)], unique=True)
-    if 'zero' not in collections:
-        db['zero'].create_index([('id', 1)], unique=True)
-
-    raw = db['raw']
-    user = db['user']
     zero = db['zero']
     return db
 
@@ -41,11 +28,29 @@ def zero_exist(_id):
     return zero.find_one({'id': _id}) is not None
 
 
-def zero_get_one(_id):
+def zero_is_download(_id):
     __get_db()
-    return zero.find_one({'download', False})
+    return zero.find_one({'id': _id})['state'] == 1
 
 
-def zero_downloaded(_id):
+def zero_get_one():
     __get_db()
-    zero.update_one({'id': _id}, {'download', True})
+    return zero.find_one({'state': 0})
+
+
+# state
+# 0 - none
+# 1 - downloading
+# 2 - download failed
+# 3 - downloaded
+# 4 - uploading
+# 5 - upload failed
+# 6 - uploaded
+def zero_set_state(_id, state):
+    __get_db()
+    zero.update_one({'id': _id}, {'$set': {'state': state}})
+
+
+def zero_set_info(_id, info):
+    __get_db()
+    zero.update_one({'id': _id}, {'$set': {'info': info}})

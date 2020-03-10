@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .idea/
+res_downloader/chrome_option
+res_downloader/zip

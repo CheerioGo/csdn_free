@@ -8,13 +8,20 @@
 import scrapy
 
 
-class CsdnSpiderItem(scrapy.Item):
-    # define the fields for your item here like:
-    url = scrapy.Field()
+class UserSpiderItem(scrapy.Item):
+    id = scrapy.Field()
+    name = scrapy.Field()
+
+    def to_doc(self):
+        doc = {
+            'id': self['id'],
+            'name': self['name'],
+            'state': 0,
+        }
+        return doc
 
 
 class ZeroSpiderItem(scrapy.Item):
-    # define the fields for your item here like:
     id = scrapy.Field()
     title = scrapy.Field()
     url = scrapy.Field()
@@ -32,6 +39,6 @@ class ZeroSpiderItem(scrapy.Item):
             'brief': self['brief'],
             'date': self['date'],
             'url': self['url'],
-            'download': False,
+            'state': 0,
         }
         return doc

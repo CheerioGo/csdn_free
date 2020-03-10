@@ -21,15 +21,17 @@ NEWSPIDER_MODULE = 'csdn_spider.spiders'
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 64
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0.05
+DOWNLOAD_DELAY = 0.01
+DOWNLOAD_TIMEOUT = 5
+
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 64
-CONCURRENT_REQUESTS_PER_IP = 64
+CONCURRENT_REQUESTS_PER_DOMAIN = 32
+CONCURRENT_REQUESTS_PER_IP = 32
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
@@ -51,12 +53,10 @@ COOKIES_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'csdn_spider.middlewares.CsdnSpiderDownloaderMiddleware': 543,
-# }
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+    # 'csdn_spider.middlewares.RandomProxyMiddleware': 100,
     'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400,
     'scrapy_fake_useragent.middleware.RetryUserAgentMiddleware': 401,
 }
@@ -96,4 +96,4 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-LOG_LEVEL = "INFO"
+LOG_LEVEL = "ERROR"

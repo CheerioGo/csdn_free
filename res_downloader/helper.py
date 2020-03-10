@@ -3,6 +3,7 @@ import time
 import platform
 import os
 import config
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 driver: selenium.webdriver.Chrome = None
 
@@ -34,12 +35,13 @@ def init(_option_path=''):
 
     if _option_path == '':
         _option_path = option_path
+
     options = selenium.webdriver.ChromeOptions()
     options.add_argument("user-data-dir=" + _option_path)
-    options.add_argument('disable-infobars')
     options.add_argument('--mute-audio')
     options.add_argument('--disable-gpu')
     options.add_argument("--log-level=3")
+    options.add_argument("--user-agent=iphone x")
 
     prefs = {
         "disable-popup-blocking": False,
@@ -50,21 +52,22 @@ def init(_option_path=''):
         'profile.default_content_setting_values': {'notifications': 2},
     }
 
-    from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+    options.add_experimental_option("prefs", prefs)
+    options.add_experimental_option("excludeSwitches", ['enable-automation'])
+    options.add_experimental_option('useAutomationExtension', False)
+
     cap = DesiredCapabilities.CHROME
     cap["pageLoadStrategy"] = "none"
 
-    options.add_experimental_option("prefs", prefs)
-    os.chmod(_driver_path, 755)
+    os.chmod(_driver_path, 0o777)
     driver = selenium.webdriver.Chrome(options=options, executable_path=_driver_path, desired_capabilities=cap)
-    driver.set_window_size(1000, 750)
+    driver.set_window_size(500, 800)
     reset_timeout()
 
 
 def reset_timeout():
     driver.set_page_load_timeout(10)
     driver.set_script_timeout(10)
-    # driver.implicitly_wait(10)
 
 
 def is_busy():
@@ -136,15 +139,15 @@ def logout():
 def auto_login():
     while not check_login():
         print('自动登录...')
-        if driver.current_url != 'https://passport.csdn.net/login':
-            get('https://passport.csdn.net/login')
+        if driver.current_url != 'https://passport.csdn.net/signwap':
+            get('https://passport.csdn.net/signwap')
 
         input("请手动登录，并按任意键继续...")
         print('验证完成！尝试重新登录中...')
         continue
 
 
-def auto_download(url, qq_num=config.default_qq, qq_name=config.default_qq_name, qq_group=-1):
+def auto_download(url):
     step = 'begin download'
     try:
         step = 'url cut #'
@@ -160,190 +163,53 @@ def auto_download(url, qq_num=config.default_qq, qq_name=config.default_qq_name,
 
         step = 'get url'
         get(url)
-        time.sleep(3)
 
-        step = 'valid page'
-        if find('//div[@class="error_text"]') is not None:
-            return __download_result(False, find('//div[@class="error_text"]').text)
+        step = 'set id'
+        _id = url[url.rfind('/') + 1:]
 
-        step = 'get download info'
-        info = __get_download_info()
-        info['url'] = url
-        info['qq_num'] = qq_num
-        info['qq_name'] = qq_name
-        info['qq_group'] = qq_group
-
-        step = 'check already download'
-        if __already_download(info['id']):
-            step = 'already download set zip file name'
-            info['filename'] = __get_file_name_in_zip_file(info['id'])
-            step = 'save to db'
-            __save_to_db(info)
-            step = 'finish'
-            return __download_result(True, "success", info)
-
-        step = 'find download button'
-        btn = find('//a[text()="VIP下载"]')
-        vip_channel = True
-        step = 'check download channel'
-        if btn is None:
-            vip_channel = False
-        if not vip_channel:
-            btn = find('//div[@class="dl_download_box dl_download_l"]/a[@class="direct_download"]')
+        step = 'find btn'
+        btn = find('//a[@class="do_download btn-block-link btn-border-red"]')
         if btn is None:
             return __download_result(False, "该资源没有下载通道")
 
         step = 'clear download dir'
         __clear_download_dir()
-        time.sleep(1)
 
         step = 'click download button'
         btn.click()
+
+        step = 'check redirect'
         time.sleep(1)
+        if driver.current_url != url:
+            return __download_result(False, 'redirect')
 
-        step = 'check max count'
-        if find('//div[@class="vip_tips"]').text.find('上限') != -1:
-            return __download_result(False, 'CSDN今日下载次数已达上限（20），请明日在来下载。')
-
-        step = 'find confirm download'
-        if vip_channel:
-            if find('//div[@class="alert-box download_box"]') is not None:
-                find('//a[@class="dl_btn do_download vip_dl_btn"]').click()
-            else:
-                pass  # 无弹窗情况（自己的资源）
-        else:
-            if find('//div[@id="noVipEnoughP"]').get_attribute('style').find('display: block;') != -1:
-                find('//div[@id="noVipEnoughP"]//a[@class="dl_btn js_download_btn"]').click()
-            elif find('//div[@id="download"]').get_attribute('style').find('display: block;') != -1:
-                find('//div[@id="download"]//a[@class="dl_btn js_download_btn"]').click()
-            elif find('//div[@id="noVipEnoughP"]').get_attribute('style').find('display: block;') != -1:
-                find('//div[@id="noVipEnoughP"]//a[@class="dl_btn js_download_btn"]').click()
-            elif find('//div[@id="noVipEnoughP"]').get_attribute('style').find('display: block;') != -1:
-                find('//div[@id="noVipEnoughP"]//a[@class="dl_btn js_download_btn"]').click()
-            elif find('//div[@id="noVipNoEnoughPNoC"]').get_attribute('style').find('display: block;') != -1:
-                return __download_result(False, "积分不足下载！")
-            elif find('//div[@id="dl_lock"]').get_attribute('style').find('display: block;') != -1:
-                return __download_result(False, find('//div[@id="dl_lock"]').text)
-            else:
-                pass  # 无弹窗情况（自己的资源）
-
-            time.sleep(1)
-            if find('//div[@id="dl_security_detail"]').get_attribute('style').find('display: block;') != -1:
-                # input('下载过于频繁，请输入验证码，并按任意键继续...')
-                # print('验证完成！继续下载任务中...')
-                return __download_result(False, "下载过于频繁，请输入验证码")
+        step = 'check block'
+        time.sleep(0.1)
+        block = find('//div[@id="st_toastBox"]').get_attribute('style').find('opacity:') != -1
+        if block:
+            info = find('//span[@id="st_toastContent"]').text
+            return __download_result(False, info)
 
         step = 'wait for download'
         __wait_for_download()
 
-        step = 'add filename to info'
-        info['filename'] = os.path.basename(__get_tmp_download_file())
-
         step = 'zip file'
-        __zip_file(info['id'])
+        __zip_file(_id)
 
         step = 'save to db'
-        __save_to_db(info)
+        __save_to_db(_id)
 
         step = 'finish'
-        return __download_result(True, "success", info)
+        return __download_result(True, "success")
     except:
         import traceback
         traceback.print_exc()
-        return __download_result(False, "error : %s" % step)
-
-
-async def export_all():
-    import asyncio
-    await asyncio.sleep(1)
-    format_url = 'https://download.csdn.net/my/uploads/1/{}'
-    res_url = []
-    for i in range(1, 100):
-        _url = format_url.format(i)
-        get(_url)
-        if find('//dt[@class="empty_icons"]') is not None:
-            break
-        els = find_all('//div[@class="content"]/h3/a[@target="_blank"]')
-        for el in els:
-            if el.get_attribute('href') is None:
-                continue
-            res_url.append(el.get_attribute('href'))
-    for _url in res_url:
-        yield "开始下载：" + _url
-        auto_download(_url)
-        yield "下载完成：" + _url
+        return __download_result(False, step, True)
 
 
 def __valid_download_url(url):
     # 暂时屏蔽验证
     return True
-    import requests
-    if requests.get(url).text.find('<div class="download_l fl" id="detail_down_l">') != -1:
-        return True
-    return False
-
-
-def get_money(qq_num):
-    money = 0
-    for donor in config.donate_list:
-        if donor['qq'] == qq_num:
-            money = donor['money']
-            break
-    return money
-
-
-def monthly_download_count(qq_num):
-    return int(get_money(qq_num) ** 0.7) + config.monthly_download_count
-
-
-def weekly_download_count(qq_num):
-    return int(get_money(qq_num) ** 0.5) + config.weekly_download_count
-
-
-def daily_download_count(qq_num):
-    return int(get_money(qq_num) ** 0.3) + config.daily_download_count
-
-
-def check_download_limit(qq_num, qq_group):
-    import db_helper
-
-    count = daily_download_count(qq_num)
-    if db_helper.count_daily(qq_num, qq_group) >= count:
-        return False, "您今日下载次数已达到上限（%d）次，请明日再来下载！" % count
-
-    count = weekly_download_count(qq_num)
-    if db_helper.count_weekly(qq_num, qq_group) >= count:
-        return False, "您本周下载次数已达到上限（%d）次，请下周再来下载！" % count
-
-    count = monthly_download_count(qq_num)
-    if db_helper.count_monthly(qq_num, qq_group) >= count:
-        return False, "您本月下载次数已达到上限（%d）次，请下月再来下载！" % count
-
-    return True, ""
-
-
-def __trans_type(_url):
-    i = _url.rfind('/')
-    return _url[i + 1:-4]
-
-
-def __get_download_info():
-    import datetime
-    coin_el = find('//label[@class="required-points"]/em')
-    coin = 0 if coin_el is None else int(coin_el.text.strip())
-    date_str = find('//strong[@class="size_box"]/span[1]').text.strip()[:10]
-    info = {
-        'id': driver.execute_script('return source["id"]'),
-        'title': driver.execute_script('return source["title"]'),
-        'description': find('//div[@class="resource_description"]').text.strip(),
-        'type': __trans_type(find('//dl[@class="resource_box_dl"]/dt/img').get_attribute('src')),
-        'tag': find('//a[@class="tag"]').text.strip(),
-        'coin': coin,
-        'stars': find_count('//span[@class="starts"]//i[@class="fa fa-star yellow"]'),
-        'upload_date': datetime.datetime.strptime(date_str, "%Y-%m-%d"),
-        'size': find('//strong[@class="size_box"]/span[2]/em').text.strip(),
-    }
-    return info
 
 
 def __clear_download_dir():
@@ -361,7 +227,7 @@ def __get_tmp_download_file():
 
 
 def __wait_for_download():
-    time.sleep(3)  # wait for create file
+    time.sleep(2)  # wait for create file
     wait_time = 20
     last_size = os.path.getsize(__get_tmp_download_file())
     while wait_time > 0 and __get_tmp_download_file().endswith('.crdownload'):
@@ -387,59 +253,11 @@ def __zip_file(_id):
         zipf.write(file_path, os.path.basename(file_path))
 
 
-def __get_file_name_in_zip_file(_id):
-    import zipfile
-    zip_path = os.path.join(zip_save_path, "{0}.zip".format(_id))
-    zipf = zipfile.ZipFile(zip_path)
-    files = zipf.namelist()
-    if len(files) != 1:
-        return None
-    return files[0]
+def __save_to_db(_id):
+    import db
+    if not db.zero_is_download(_id):
+        db.zero_set_state(_id, 1)
 
 
-def __already_download(_id):
-    import db_helper
-    if db_helper.exist_download(_id) and db_helper.get_download(_id).download_url is not None:
-        return True
-    zip_path = os.path.join(zip_save_path, "{0}.zip".format(_id))
-    if os.path.exists(zip_path):
-        file_name = __get_file_name_in_zip_file(_id)
-        if file_name is not None and not file_name.endswith('.crdownload'):
-            return True
-    return False
-
-
-def __save_to_db(info):
-    import db_helper
-    if not db_helper.exist_download(info['id']):
-        db_helper.insert_download(info)
-
-
-def __download_result(success, message='', info=None):
-    return {'success': success, 'message': message, 'info': info, }
-
-
-def get_user_info():
-    try:
-        auto_login()
-        get('https://download.csdn.net/my/vip')
-        time.sleep(2)
-        name = find('//div[@class="name"]/span').text.strip()
-        is_vip = find('//a[@class="btn_vipsign"]') is None
-        info = {
-            'name': name,
-            'vip': is_vip
-        }
-        if is_vip:
-            remain = find('//div[@class="cardr"]/ul/li/span').text.strip()
-            date = find('//div[@class="cardr"]/ul/li[2]/span').text.strip()
-            info['remain'] = remain
-            info['date'] = date
-        else:
-            remain = find('//ul[@class="datas clearfix"]//span').text.strip()
-            info['remain'] = remain
-        return info
-    except:
-        import traceback
-        traceback.print_exc()
-        return None
+def __download_result(success, message='', exception=False):
+    return {'success': success, 'message': message, "exception": exception}

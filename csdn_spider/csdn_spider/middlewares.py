@@ -6,6 +6,8 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import requests
+import json, random
 
 
 class CsdnSpiderSpiderMiddleware(object):
@@ -101,3 +103,27 @@ class CsdnSpiderDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class RandomProxyMiddleware(object):
+    def __init__(self):
+        res = requests.get('https://www.freeip.top/api/proxy_ips')
+        self.ip_list = json.loads(res.content)['data']['data']
+        self.random_int = 1
+        print(f'ip list {len(self.ip_list)}')
+
+    def process_request(self, request, spider):
+        self.get_proxy(request)
+        return None
+
+    def process_exception(self, request, exception, spider):
+        return self.get_proxy(request)
+
+    def get_proxy(self, request):
+        self.random_int = random.randint(0, len(self.ip_list) - 1)
+        ip_dic = self.ip_list[self.random_int]
+        ip = ip_dic['ip']
+        port = ip_dic['port']
+        ip_address = 'http://' + ip + ':' + port
+        request.meta['proxy'] = ip_address
+        return request
