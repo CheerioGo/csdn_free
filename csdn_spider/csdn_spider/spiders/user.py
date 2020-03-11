@@ -20,6 +20,7 @@ class UserSpider(scrapy.Spider):
     drop_count = 0
     fail_count = 0
     hit_count = 0
+    duplicate_count = 0
     crawl_count = 0
 
     # slutroulettelive
@@ -65,15 +66,18 @@ class UserSpider(scrapy.Spider):
 
     def process_second(self, item):
         if not db.user_exist(item['id']):
-            db.user_insert(item.to_doc())
-            self.hit_count += 1
+            success = db.user_insert(item.to_doc())
+            if success:
+                self.hit_count += 1
+            else:
+                self.duplicate_count += 1
 
     def close_second(self):
         print(f'catch: {len(self.ids_seen)}, drop: {self.drop_count}')
 
     def print_status(self):
-        tags = ['Crawl', 'Hit', 'Repeat', 'Fail']
-        vals = [self.crawl_count, self.hit_count, self.drop_count, self.fail_count]
+        tags = ['Crawl', 'Hit', 'Miss', 'Duplicate', 'Fail']
+        vals = [self.crawl_count, self.hit_count, self.drop_count, self.duplicate_count, self.fail_count]
         self.printer.print(tags, vals)
 
     def error_back(self, failure):

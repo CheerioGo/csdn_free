@@ -1,4 +1,5 @@
 import time
+import os
 from prettytable import PrettyTable
 
 
@@ -9,6 +10,7 @@ class Printer:
     table = PrettyTable()
 
     def __init__(self):
+        os.system('mode con cols=40 lines=10')
         self.start()
 
     def start(self):
@@ -24,6 +26,7 @@ class Printer:
         if curr - self.last_time < interval:
             return
 
+        os.system('cls')
         self.table.clear_rows()
         for i in range(len(tags)):
             add = values[i] - self.last_values[i]

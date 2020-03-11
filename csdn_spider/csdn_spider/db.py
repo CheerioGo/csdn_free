@@ -15,7 +15,7 @@ zero: pymongo.collection.Collection = None
 # zero - 2 : 已上传至云端资源
 
 def __init_db():
-    client = pymongo.MongoClient(host="127.0.0.1", port=27017, username="yinlong91", password="yl873044")
+    client = pymongo.MongoClient(host="39.105.150.229", port=8743, username="yinlong91", password="yl873044")
     global db
     global user
     global zero
@@ -76,7 +76,12 @@ def user_get_zero_id():
 
 def user_insert(docs):
     __get_db()
-    user.insert_one(docs)
+    try:
+        user.insert_one(docs)
+    except pymongo.errors.DuplicateKeyError:
+        # print(f'DuplicateKey: {docs["id"]}')
+        return False
+    return True
 
 
 def user_set_state(_id, state):
