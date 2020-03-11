@@ -6,11 +6,12 @@ from prettytable import PrettyTable
 class Printer:
     start_time = 0
     last_time = 0
+    init_values = []
     last_values = []
     table = PrettyTable()
 
     def __init__(self):
-        os.system('mode con cols=40 lines=10')
+        os.system('mode con cols=40 lines=12')
         self.start()
 
     def start(self):
@@ -20,6 +21,8 @@ class Printer:
     def print(self, tags: [], values: [], interval: float = 1):
         if len(self.last_values) != len(values):
             self.last_values = values
+        if len(self.init_values) != len(values):
+            self.init_values = values
         if len(self.table.field_names) == 0:
             self.table.field_names = ["Tags", "Count", " Add ", "Speed"]
         curr = time.time()
@@ -30,8 +33,9 @@ class Printer:
         self.table.clear_rows()
         for i in range(len(tags)):
             add = values[i] - self.last_values[i]
-            speed = values[i] / (curr - self.start_time)
-            self.table.add_row([tags[i], f'{values[i]}', f'{add}', f'{speed:.1f}'])
+            count = values[i] - self.init_values[i]
+            speed = count / (curr - self.start_time)
+            self.table.add_row([tags[i], f'{count}', f'{add}', f'{speed:.1f}'])
 
         print(self.table)
         self.last_time = curr - (curr - self.last_time) % interval

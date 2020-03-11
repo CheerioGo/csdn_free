@@ -97,3 +97,8 @@ def user_set_zero(_id, zero):
 def user_exist(_id):
     __get_db()
     return user.find_one({'id': _id}) is not None
+
+
+def user_count():
+    __get_db()
+    return user.count()

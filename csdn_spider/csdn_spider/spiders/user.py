@@ -76,8 +76,8 @@ class UserSpider(scrapy.Spider):
         print(f'catch: {len(self.ids_seen)}, drop: {self.drop_count}')
 
     def print_status(self):
-        tags = ['Crawl', 'Hit', 'Miss', 'Duplicate', 'Fail']
-        vals = [self.crawl_count, self.hit_count, self.drop_count, self.duplicate_count, self.fail_count]
+        tags = ['Crawl', 'Hit', 'Miss', 'Total', 'Duplicate', 'Fail']
+        vals = [self.crawl_count, self.hit_count, self.drop_count, db.user_count(), self.duplicate_count, self.fail_count]
         self.printer.print(tags, vals)
 
     def error_back(self, failure):
