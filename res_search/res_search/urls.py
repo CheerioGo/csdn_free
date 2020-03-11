@@ -19,8 +19,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import staticfiles
 
 urlpatterns = [
+    path('', view.index),
     path('search', view.search),
-    path('search_progress', view.search_progress),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

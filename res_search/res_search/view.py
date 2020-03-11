@@ -67,11 +67,11 @@ def _response(state, result_count=0, p_i=0, p_n=0, result_json=''):
         content_type='application/json')
 
 
-def search(request):
+def index(request):
     return render(request, 'index.html')
 
 
-def search_progress(request):
+def search(request):
     if request.method == 'GET':
         return HttpResponse()
 

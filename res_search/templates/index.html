@@ -9,84 +9,8 @@
     <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.js"></script>
     <script>
-        var murmur = '';
-        var result_count = 0;
-        var result_json = '';
 
-        function catch_murmur()
-        {
-            setTimeout(function ()
-            {
-                Fingerprint2.get(function (components)
-                {
-                    var values = components.map(function (component) { return component.value })
-                    murmur = Fingerprint2.x64hash128(values.join(''), 31)
-                })
-            }, 500)
-        }
 
-        function clearCookies()
-        {
-            var keys = document.cookie.match(/[^ =;]+(?=\=)/g);
-            if(keys)
-            {
-                for(var i = keys.length; i--;)
-                    document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString()
-            }
-        }
-
-        function refresh_html()
-        {
-            $("#result_count").html('共 '+result_count+' 个免费资源')
-
-            for(var _url in _result)
-            {
-                var stars_array = ["☆☆☆☆☆","★☆☆☆☆","★★☆☆☆","★★★☆☆","★★★★☆","★★★★★"];
-                var _star = stars_array[_result[_url]["stars"]];
-                var _desc = _result[_url]["description"];
-                var _title = _result[_url]["title"];
-                var _date = _result[_url]["upload_date"];
-
-                var dl = '<dl class="form-inline form-group">';
-                dl += '<dt><a href="'+_url+'" target="_blank" style="font-size:18px"><b>';
-                dl += _rank + '. '+ _title +'</b></a></dt>';
-
-                dl += '<dd>\
-                <p class="text-muted">* '+_desc+'</p>\
-                <p class="text-muted">时间：'+_date+'　　\
-                评分：<span style="font-size:20px;height:16px;">'+_star+'</span></p>\
-                </dd>';
-
-                dl += '</dl>';
-                dl += '<hr>';
-                _html += dl;
-                _rank += 1;
-            }
-
-            $("#p").html(_html);
-        }
-
-        function search_begin()
-        {
-            var keyword = $("#keyword").val();
-            var search_deep = $("#search_deep").val();
-            if(keyword == '' || search_deep == '')
-                return;
-
-            search_act('begin', keyword , search_deep);
-        }
-
-        function onKeyDown(event)
-        {
-             var e = event || window.event || arguments.callee.caller.arguments[0];
-             if(e && e.keyCode==13)// enter 键
-             {
-                search_begin();
-             }
-        }
-
-        setTimeout("clearCookies()", 50);
-        setTimeout("catch_murmur()", 50);
 
 
     </script>
@@ -95,36 +19,21 @@
 <body>
 
 <div class="container" style="width:88%;">
+    <img class="center-block img-circle" src="/static/images/psyduck.ico" style="width:120px;">
     <div class="text-center">
-        <h2 class="text-muted"><b> CSDN资源搜索</b></h2>
+        <label class="text-danger">"Psyduck~"</label>
         <label id="total_count" class="label label-primary" style="font-size:14px;"></label>
         <p class="text-primary" id="cost"></p>
     </div>
-    <div class="input-group form-group" style="width:60%">
-        <input type="text" id="keyword" tabindex="1" class="form-control" placeholder="请输入关键字搜索"
+    <div class="input-group input-group-lg form-group col-md-4 col-md-offset-4">
+        <input type="text" id="keyword" tabindex="1" class="form-control" placeholder="输入关键字搜索"
                onkeydown="onKeyDown(event)"/>
         <span class="input-group-btn">
-                <button type="button" class="btn btn-info btn-search glyphicon glyphicon-search"
-                        style="margin-top: -1px;" onclick="search_begin()">
-                </button>
-            </span>
+            <button type="button" class="btn btn-info btn-search glyphicon glyphicon-search"
+                    style="margin-top: -1px;" onclick="search_begin()">
+            </button>
+        </span>
     </div>
-    <!--
-    <div class="form-group form-inline">
-        <select data-placeholder="搜索深度" name="carOwner" id="search_deep"
-                class="form-control chosen-select form-group" tabindex="2" required>
-            <option value="40">搜索深度(低)</option>
-            <option value="60" selected="selected">搜索深度(中)</option>
-            <option value="80">搜索深度(高)</option>
-        </select>
-        <select data-placeholder="排序类型" name="carOwner" id="sort_type"
-                class="form-control chosen-select form-group" tabindex="3" required>
-            <option value="0">默认排序</option>
-            <option value="1">最新上传</option>
-        </select>
-        <button type="button" class="btn btn-danger form-group" onclick="search_clear()"> 清空结果</button>
-    </div>
-    -->
     <div class="form-group form-inline">
         <label id="result_title" class="label label-warning form-group"></label>
         <label id="result_count" class="label label-primary form-group"></label>
