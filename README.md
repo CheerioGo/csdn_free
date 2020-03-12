@@ -1,5 +1,5 @@
-# csdn_free
-CSDN 免费资源收集、下载
+# CSDN FREE
+* CSDN 免费资源收集、下载
 
 ## 说明
 ### csdn_spider 项目为 csdn 资源爬虫
