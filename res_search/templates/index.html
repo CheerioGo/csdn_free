@@ -8,16 +8,10 @@
     <link rel="bookmark" href="/static/images/psyduck.ico"/>
     <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.js"></script>
-    <script>
-
-
-
-
-    </script>
+    <script src="/static/js/psyduck_search.js"></script>
 </head>
 
 <body>
-
 <div class="container" style="width:88%;">
     <img class="center-block img-circle" src="/static/images/psyduck.ico" style="width:120px;">
     <div class="text-center">
@@ -30,7 +24,7 @@
                onkeydown="onKeyDown(event)"/>
         <span class="input-group-btn">
             <button type="button" class="btn btn-info btn-search glyphicon glyphicon-search"
-                    style="margin-top: -1px;" onclick="search_begin()">
+                    style="margin-top: -1px;" onclick="search()">
             </button>
         </span>
     </div>
@@ -39,7 +33,8 @@
         <label id="result_count" class="label label-primary form-group"></label>
     </div>
     <div id="progress"></div>
-    <div id="p"></div>
+    <div id="p" class="form-group"></div>
+    <div class="text-center"><label id="bottom_load" class="text-danger"></label></div>
     <div class="row" style="height:120px;"></div>
 </div>
 <footer class="text-center navbar-fixed-bottom" style="background:linear-gradient(#ffffff00,#ffffffcc,#ffffffff);">
