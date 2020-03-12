@@ -1,4 +1,6 @@
 import pymongo
+import pymongo.errors
+from csdn_spider import db_setting
 
 db: pymongo.MongoClient = None
 raw: pymongo.collection.Collection = None
@@ -15,7 +17,8 @@ zero: pymongo.collection.Collection = None
 # zero - 2 : 已上传至云端资源
 
 def __init_db():
-    client = pymongo.MongoClient(host="127.0.0.1", port=8743, username="yinlong91", password="yl873044")
+    client = pymongo.MongoClient(host=db_setting.host, port=db_setting.port
+                                 , username=db_setting.username, password=db_setting.password)
     global db
     global user
     global zero
