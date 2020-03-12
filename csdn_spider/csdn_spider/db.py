@@ -48,12 +48,30 @@ def __get_db():
 # zero
 def zero_insert(docs):
     __get_db()
-    zero.insert_one(docs)
+    try:
+        zero.insert_one(docs)
+    except pymongo.errors.DuplicateKeyError:
+        return False
+    return True
 
 
 def zero_exist(_id):
     __get_db()
     return zero.find_one({'id': _id}) is not None
+
+
+def zero_get_state_url():
+    __get_db()
+    data = zero.find_one({'state': 0})
+    if data is None:
+        return None
+    zero_set_state(data['id'], 1)
+    return data['url']
+
+
+def zero_set_state(_id, state):
+    __get_db()
+    zero.update_one({'id': _id}, {'$set': {'state': state}})
 
 
 # user
@@ -82,7 +100,6 @@ def user_insert(docs):
     try:
         user.insert_one(docs)
     except pymongo.errors.DuplicateKeyError:
-        # print(f'DuplicateKey: {docs["id"]}')
         return False
     return True
 
