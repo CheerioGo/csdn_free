@@ -32,7 +32,7 @@ class ExtendSpider(scrapy.Spider):
         for card in cards:
             url = tools.list0(card.xpath('dd/a/@href').extract())
             user_id = tools.between(url, 'download.csdn.net/download/', '/')
-            cost = tools.list0(card.xpath('dd//em[@class="cost"]/text()').extract()).strip()
+            # cost = tools.list0(card.xpath('dd//em[@class="cost"]/text()').extract()).strip()
             if not db.user_exist(user_id):
                 doc = {
                     'id': user_id,
@@ -45,6 +45,7 @@ class ExtendSpider(scrapy.Spider):
                 else:
                     self.user_duplicate_count += 1
 
+            continue
             if cost == '0':
                 _id = tools.tail(url, '/')
                 if not db.zero_exist(_id):
